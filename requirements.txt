@@ -6,7 +6,6 @@ crispy-bootstrap5==2024.10
 dj-database-url==2.3.0
 Django==5.1.2
 django-allauth==65.3.0
-django-configurations==2.5.1
 django-cors-headers==3.10.1
 django-crispy-forms==2.3
 django-debug-toolbar==4.4.6
@@ -25,3 +24,4 @@ typing_extensions==4.12.2
 tzdata==2024.2
 urllib3==2.2.3
 whitenoise==6.0.0
+psycopg[binary]==3.2.3
