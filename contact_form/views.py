@@ -48,4 +48,5 @@ def contact_submit(request):
         email.send(fail_silently=False)
         return Response({"ok": True}, status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({"ok": False, "error": "Αποτυχία αποστολής."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        print("EMAIL ERROR:", e)
+        return Response({"ok": False, "error": str(e)}, status=500)

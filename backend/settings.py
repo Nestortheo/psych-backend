@@ -15,7 +15,9 @@ import os
 from dotenv import load_dotenv
 
 # Φόρτωση .env αρχείου
-load_dotenv()
+
+if os.getenv("ENV") != "production":
+    load_dotenv()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,11 +28,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "https://michoudis-dimitris.vercel.app",
+]
 
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "https://michoudis-dimitris.vercel.app",
+]
+SECRET_KEY = os.getenv("SECRET_KEY")
+if os.getenv("ENV") == "production" and not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY is missing in production")
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,19 +60,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "corsheaders.middleware.CorsMiddleware",
-
-]
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",   # Vite dev
-    # "https://to-domain-sou.gr",
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -127,7 +134,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -137,10 +144,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ---------------------------------------------------------------------
 # 📧 Email configuration (from .env)
 # ---------------------------------------------------------------------
-EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = os.getenv('EMAIL_HOST')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT'))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 CONTACT_RECIPIENT = os.getenv('CONTACT_RECIPIENT')
