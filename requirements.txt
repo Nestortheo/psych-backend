@@ -25,3 +25,4 @@ tzdata==2024.2
 urllib3==2.2.3
 whitenoise==6.0.0
 psycopg[binary]==3.2.3
+python-dotenv==1.0.1
