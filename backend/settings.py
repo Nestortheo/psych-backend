@@ -14,10 +14,13 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+import dj_database_url
+
 # Φόρτωση .env αρχείου
 
 if os.getenv("ENV") != "production":
     load_dotenv()
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -34,12 +37,14 @@ ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://michoudis-dimitris.vercel.app",
+    "https://psych-site-gamma.vercel.app",
+    "https://www.dimitrismichoudis.gr",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
-    "https://michoudis-dimitris.vercel.app",
+    "https://psych-site-gamma.vercel.app",
+    "https://www.dimitrismichoudis.gr",
 ]
 SECRET_KEY = os.getenv("SECRET_KEY")
 if os.getenv("ENV") == "production" and not SECRET_KEY:
@@ -59,8 +64,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
     "corsheaders.middleware.CorsMiddleware",
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,14 +96,28 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+ENV = os.getenv("ENV", "development")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+
+if ENV == "production":
+    if not DATABASE_URL:
+        raise RuntimeError("DATABASE_URL is required in production")
+
+    DATABASES = {
+        "default": dj_database_url.parse(DATABASE_URL)
     }
-}
 
+    DATABASES["default"].setdefault("OPTIONS", {})
+    DATABASES["default"]["OPTIONS"]["sslmode"] = "require"
+
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -151,7 +170,7 @@ EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 CONTACT_RECIPIENT = os.getenv('CONTACT_RECIPIENT')
-SECRET_KEY = os.getenv('SECRET_KEY')
+
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
